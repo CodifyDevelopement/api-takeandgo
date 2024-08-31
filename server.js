@@ -31,12 +31,17 @@ const coffeeOptions = [
 ];
 
 app.post('/api/order', async (req, res) => {
-  const { coffeeType, clientName, phoneNumber } = req.body;
-
-  // Validate coffee type
-  if (!coffeeOptions.includes(coffeeType)) {
-    return res.status(400).json({ error: 'Invalid coffee type' });
+  try {
+    const { coffeeType, clientName, phoneNumber } = req.body;
+    // Validate input and create order
+    const order = new Order({ coffeeType, clientName, phoneNumber });
+    await order.save();
+    res.status(201).json(order);
+  } catch (error) {
+    console.error('Error placing order:', error);
+    res.status(500).json({ error: 'Failed to place order' });
   }
+});
 
   const order = new Order({ coffeeType, clientName, phoneNumber });
   try {
