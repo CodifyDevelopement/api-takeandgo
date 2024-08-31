@@ -4,6 +4,8 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 
 const app = express();
+
+// Enable CORS for all origins
 app.use(cors());
 app.use(bodyParser.json());
 
@@ -30,10 +32,17 @@ const coffeeOptions = [
   'Lait'
 ];
 
+// POST: Create a new order
 app.post('/api/order', async (req, res) => {
   try {
     const { coffeeType, clientName, phoneNumber } = req.body;
-    // Validate input and create order
+
+    // Validate coffee type
+    if (!coffeeOptions.includes(coffeeType)) {
+      return res.status(400).json({ error: 'Invalid coffee type' });
+    }
+
+    // Create and save the order
     const order = new Order({ coffeeType, clientName, phoneNumber });
     await order.save();
     res.status(201).json(order);
@@ -43,16 +52,7 @@ app.post('/api/order', async (req, res) => {
   }
 });
 
-  const order = new Order({ coffeeType, clientName, phoneNumber });
-  try {
-    await order.save();
-    res.status(201).json(order);
-  } catch (error) {
-    console.error('Error saving order:', error);
-    res.status(500).json({ error: 'Failed to create order' });
-  }
-});
-
+// GET: Fetch all orders
 app.get('/api/orders', async (req, res) => {
   try {
     const orders = await Order.find();
@@ -63,6 +63,7 @@ app.get('/api/orders', async (req, res) => {
   }
 });
 
+// PUT: Update order status
 app.put('/api/orders/:id', async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
@@ -79,6 +80,7 @@ app.put('/api/orders/:id', async (req, res) => {
   }
 });
 
+// DELETE: Delete an order
 app.delete('/api/orders/:id', async (req, res) => {
   const { id } = req.params;
 
